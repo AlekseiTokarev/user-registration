@@ -11,7 +11,6 @@ class User(
 
 class Address(
     var id: Long,
-    val archive: Boolean,
     val line1: String,
     var line2: String?,
     val city: String,

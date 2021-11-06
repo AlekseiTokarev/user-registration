@@ -1,5 +1,6 @@
 package com.github.alekseitokarev.userregistration.dao
 
+import com.github.alekseitokarev.userregistration.domain.Address
 import com.github.alekseitokarev.userregistration.domain.User
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Repository
@@ -10,19 +11,32 @@ class UserRepository(private val databaseClient: DatabaseClient) {
 
     fun findById(userId: Long): User? {
         val select = """
-            SELECT users.user_id, users.first_name, users.last_name, users.email, address.line1, address.line2, address.city, address.state,address.zip
+            SELECT users.user_id, users.first_name, users.last_name, users.email,
+             address.address_id, address.line1, address.line2, address.city, address.state,address.zip
             FROM users
             LEFT JOIN address ON users.user_id = address.user_id AND address.archived = FALSE
             WHERE users.user_id = $userId"""
 
         return databaseClient.sql(select)
             .map { row ->
-                User(
+                val user = User(
                     id = row.get("user_id", Integer::class.java)!!.toLong(),
                     firstName = row.get("first_name", String::class.java)!!,
                     lastName = row.get("last_name", String::class.java)!!,
                     email = row.get("email", String::class.java)!!
                 )
+                val addressId = row.get("address_id", Integer::class.java) ?: return@map user
+
+                val address = Address(
+                    id = addressId.toLong(),
+                    line1 = row.get("line1", String::class.java)!!,
+                    line2 = row.get("line2", String::class.java),
+                    city = row.get("city", String::class.java)!!,
+                    state = row.get("state", String::class.java)!!,
+                    zip = row.get("zip", String::class.java)!!
+                )
+                user.addresses.add(address)
+                return@map user
             }
             .one()
             .block()
