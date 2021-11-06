@@ -56,6 +56,14 @@ class UserController(val userRepository: UserRepository) {
         return ResponseEntity.ok(convertToUserDetailsResponse(user))
     }
 
+    //TODO List of users
+    @GetMapping
+    fun getUsers(@RequestParam(required = false, defaultValue = "50") limit: Long,
+                 @RequestParam(required = false, defaultValue = "0") offset: Long): ResponseEntity<List<UserDto>> {
+        //should be a pretty trivial select with limit/offset
+        return ResponseEntity.ok(emptyList())
+    }
+
 }
 
 
