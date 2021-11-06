@@ -11,7 +11,7 @@ import java.net.URI
 @RequestMapping("/api/users")
 class UserController(val userRepository: UserRepository) {
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}/details")
     fun getUserDetails(@PathVariable id: Long): ResponseEntity<UserDetailsResponse> {
         val user: User = userRepository.findById(id)
             ?: return ResponseEntity.notFound().build()
