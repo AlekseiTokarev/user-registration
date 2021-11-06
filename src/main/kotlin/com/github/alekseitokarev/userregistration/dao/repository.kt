@@ -28,6 +28,15 @@ class UserRepository(private val databaseClient: DatabaseClient) {
             .block()
     }
 
+    fun existByEmail(email: String): Boolean {
+        val select = """
+            SELECT 1
+            FROM users
+            WHERE email = '$email' AND users.active LIMIT 1;"""
+
+        return databaseClient.sql(select).fetch().first().block() != null
+    }
+
     fun insert(user: User): User {
         val insert = """
             INSERT INTO users (first_name, last_name, email)
