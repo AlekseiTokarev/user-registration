@@ -15,7 +15,7 @@ class UserRepository(private val databaseClient: DatabaseClient) {
              address.address_id, address.line1, address.line2, address.city, address.state,address.zip
             FROM users
             LEFT JOIN address ON users.user_id = address.user_id AND address.archived = FALSE
-            WHERE users.user_id = $userId"""
+            WHERE users.user_id = $userId AND users.active"""
 
         return databaseClient.sql(select)
             .map { row ->
@@ -79,9 +79,17 @@ class UserRepository(private val databaseClient: DatabaseClient) {
                 VALUES('${user.id}','${user.firstName}', '${user.lastName}', '${user.email}') 
             ON CONFLICT (user_id) 
                 DO 
-            UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, email = EXCLUDED.email"""
+            UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, email = EXCLUDED.email
+            , active = true"""
 
         val result = databaseClient.sql(query).fetch().one().block()
         return user
+    }
+
+    fun deleteUser(id: Long): Unit {
+        val delete = """
+            UPDATE users SET active = false
+            WHERE user_id = $id;"""
+        databaseClient.sql(delete).fetch().first().block()
     }
 }

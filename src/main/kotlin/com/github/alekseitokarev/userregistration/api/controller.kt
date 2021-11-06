@@ -18,6 +18,12 @@ class UserController(val userRepository: UserRepository) {
         return ResponseEntity.ok(convertToUserDetailsResponse(user))
     }
 
+    @DeleteMapping("/{id}")
+    fun deleteUser(@PathVariable id: Long): ResponseEntity<Any> {
+        userRepository.deleteUser(id)
+        return ResponseEntity.noContent().build()
+    }
+
     @GetMapping("/existsByEmail")
     fun isUserExists(@RequestParam email: String): ResponseEntity<Map<String, Boolean>> {
         val userFound: Boolean = userRepository.existByEmail(email)
