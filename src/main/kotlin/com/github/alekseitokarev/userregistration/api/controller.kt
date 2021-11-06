@@ -49,6 +49,12 @@ class UserController(val userRepository: UserRepository) {
             .body(convertToUserDto(upsertedUser))
     }
 
+    @PostMapping("/{id}/address")
+    fun updateAddress(@PathVariable id: Long, @RequestBody request: AddressDto): ResponseEntity<UserDetailsResponse> {
+        val user = userRepository.updateAddress(id, request.toAddress())
+            ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(convertToUserDetailsResponse(user))
+    }
 
 }
 

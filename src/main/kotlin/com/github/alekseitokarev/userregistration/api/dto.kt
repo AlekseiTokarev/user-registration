@@ -1,5 +1,6 @@
 package com.github.alekseitokarev.userregistration.api
 
+import com.github.alekseitokarev.userregistration.domain.Address
 import com.github.alekseitokarev.userregistration.domain.User
 
 data class UserDetailsResponse(
@@ -17,7 +18,16 @@ class AddressDto(
     val city: String,
     val state: String,
     val zip: String
-)
+) {
+    fun toAddress() = Address(
+        id = null,
+        line1 = this.line1,
+        line2 = this.line2,
+        city = this.city,
+        state = this.state,
+        zip = this.zip
+    )
+}
 
 data class UserDto(
     val id: Long?,

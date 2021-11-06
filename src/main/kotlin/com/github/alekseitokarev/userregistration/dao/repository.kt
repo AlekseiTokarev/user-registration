@@ -82,7 +82,7 @@ class UserRepository(private val databaseClient: DatabaseClient) {
             UPDATE SET first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, email = EXCLUDED.email
             , active = true"""
 
-        val result = databaseClient.sql(query).fetch().one().block()
+        databaseClient.sql(query).fetch().one().block()
         return user
     }
 
@@ -91,5 +91,27 @@ class UserRepository(private val databaseClient: DatabaseClient) {
             UPDATE users SET active = false
             WHERE user_id = $id;"""
         databaseClient.sql(delete).fetch().first().block()
+    }
+
+    fun updateAddress(userId: Long, address: Address): User? {
+        val select = """
+            SELECT 1
+            FROM users
+            WHERE user_id = '$userId' and active;"""
+
+        val validUser = databaseClient.sql(select).fetch().one().block() != null
+        if (!validUser) return null
+
+        val archive = """
+            UPDATE address SET archived = true
+            WHERE user_id = $userId;"""
+        databaseClient.sql(archive).fetch().first().block()
+
+        val insert = """
+            INSERT INTO public.address (user_id, line1, line2, city, state, zip)
+                VALUES ($userId, '${address.line1}', '${address.line2}', '${address.city}', '${address.state}', '${address.zip}');"""
+        databaseClient.sql(insert).fetch().one().block()
+
+        return findById(userId)!!
     }
 }
