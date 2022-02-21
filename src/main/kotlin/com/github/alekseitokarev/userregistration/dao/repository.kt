@@ -21,19 +21,19 @@ class UserRepository(private val databaseClient: DatabaseClient) {
             .map { row ->
                 val user = User(
                     id = row.get("user_id", Integer::class.java)!!.toLong(),
-                    firstName = row.get("first_name", String::class.java)!!,
-                    lastName = row.get("last_name", String::class.java)!!,
-                    email = row.get("email", String::class.java)!!
+                    firstName = row.get("first_name", String::class.java)?:throw IllegalArgumentException("firstName"),
+                    lastName = row.get("last_name", String::class.java)?:throw IllegalArgumentException("lastName"),
+                    email = row.get("email", String::class.java)?:throw IllegalArgumentException("email")
                 )
                 val addressId = row.get("address_id", Integer::class.java) ?: return@map user
 
                 val address = Address(
                     id = addressId.toLong(),
-                    line1 = row.get("line1", String::class.java)!!,
+                    line1 = row.get("line1", String::class.java)?:throw IllegalArgumentException("line1"),
                     line2 = row.get("line2", String::class.java),
-                    city = row.get("city", String::class.java)!!,
-                    state = row.get("state", String::class.java)!!,
-                    zip = row.get("zip", String::class.java)!!
+                    city = row.get("city", String::class.java)?:throw IllegalArgumentException("city"),
+                    state = row.get("state", String::class.java)?:throw IllegalArgumentException("state"),
+                    zip = row.get("zip", String::class.java)?:throw IllegalArgumentException("zip")
                 )
                 user.addresses.add(address)
                 return@map user
