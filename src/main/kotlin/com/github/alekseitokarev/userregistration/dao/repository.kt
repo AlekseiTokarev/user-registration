@@ -3,6 +3,7 @@ package com.github.alekseitokarev.userregistration.dao
 import com.github.alekseitokarev.userregistration.domain.Address
 import com.github.alekseitokarev.userregistration.domain.User
 import org.springframework.r2dbc.core.DatabaseClient
+import org.springframework.r2dbc.core.bind
 import org.springframework.stereotype.Repository
 
 
@@ -14,10 +15,14 @@ class UserRepository(private val databaseClient: DatabaseClient) {
             SELECT users.user_id, users.first_name, users.last_name, users.email,
              address.address_id, address.line1, address.line2, address.city, address.state,address.zip
             FROM users
-            LEFT JOIN address ON users.user_id = address.user_id AND address.archived = FALSE
-            WHERE users.user_id = $userId AND users.active"""
+            LEFT JOIN address ON users.user_id = address.user_id
+                AND address.archived = FALSE
+            WHERE users.user_id = :userId
+                AND users.active
+            """.trimIndent()
 
         return databaseClient.sql(select)
+            .bind("userId", userId)
             .map { row ->
                 val user = User(
                     id = row.get("user_id", Integer::class.java)!!.toLong(),
@@ -46,9 +51,13 @@ class UserRepository(private val databaseClient: DatabaseClient) {
         val select = """
             SELECT 1
             FROM users
-            WHERE email = '$email' AND users.active LIMIT 1;"""
+            WHERE email = :email
+                AND users.active LIMIT 1;"""
 
-        return databaseClient.sql(select).fetch().first().block() != null
+        return databaseClient.sql(select)
+            .bind("email", email)
+            .fetch()
+            .first().block() != null
     }
 
     fun insert(user: User): User {
