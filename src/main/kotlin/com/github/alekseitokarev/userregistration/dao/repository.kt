@@ -121,6 +121,6 @@ class UserRepository(private val databaseClient: DatabaseClient) {
                 VALUES ($userId, '${address.line1}', '${address.line2}', '${address.city}', '${address.state}', '${address.zip}');"""
         databaseClient.sql(insert).fetch().one().block()
 
-        return findById(userId)!!
+        return findById(userId)
     }
 }
